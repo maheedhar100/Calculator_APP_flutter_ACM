@@ -1,0 +1,68 @@
+name: Build Flutter APK
+
+# Trigger the workflow on push to main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the code
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Setup Java (required for Android builds)
+    - name: Setup Java JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '11'
+
+    # Setup Flutter
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.13.0'
+        channel: 'stable'
+
+    # Get Flutter dependencies
+    - name: Install dependencies
+      run: flutter pub get
+
+    # Build APK
+    - name: Build APK
+      run: flutter build apk --release
+
+    # Upload APK as artifact
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: calculator-app-release
+        path: build/app/outputs/flutter-apk/app-release.apk
+
+    # Create Release (optional - creates downloadable release)
+    - name: Create Release
+      if: github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: Calculator App v1.0.${{ github.run_number }}
+        body: |
+          🎉 New release of Flutter Calculator App!
+          
+          ## What's New:
+          - Complete calculator functionality
+          - Modern dark theme UI
+          - Error handling for division by zero
+          - Clear and clear entry functions
+          
+          ## Download:
+          Download the APK file below to install on Android devices.
+        files: build/app/outputs/flutter-apk/app-release.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
