@@ -22,9 +22,11 @@
             </intent-filter>
         </activity>
         
-        <!-- This ensures Flutter v2 embedding -->
+        <!-- This forces Flutter v2 embedding -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+    
+    <!-- Remove any v1 embedding references -->
 </manifest>
